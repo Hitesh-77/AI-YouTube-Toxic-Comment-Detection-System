@@ -1,6 +1,56 @@
 import gradio as gr
 from youtube_comments import fetch_youtube_comments
-from predict import analyze_all_comments
+from predict import analyze_all_comments, predict_comment, labels
+import matplotlib.pyplot as plt
+import numpy as np
+
+def show_comment_details(evt: gr.SelectData, results):
+    row_index = evt.index[0]
+    selected_row = results[row_index]
+
+    selected_comment = selected_row[1]
+    cleaned_comment, probabilities, predictions = predict_comment(
+        selected_comment
+    )
+
+    if np.sum(predictions) == 0:
+        status = "🟢 Non Toxic"
+    else:
+        status = "🔴 Toxic"
+
+    toxicity_score = np.max(probabilities) * 100
+
+    prediction_details = []
+    for label, probability, prediction_value in zip(labels, probabilities, predictions):
+        prediction_details.append([
+            label,
+            round(probability * 100, 2),
+            "Positive" if prediction_value == 1 else "Negative"
+        ])
+
+    probability_plot = plt.figure(figsize = (8, 4))
+
+    plt.bar(
+        labels,
+        probabilities * 100
+    )
+
+    plt.title("Toxicity Probability Distribution")
+    plt.xlabel("Category")
+    plt.ylabel("Probability (%)")
+    plt.ylim(0, 100)
+
+    plt.xticks(rotation=30)
+    plt.tight_layout()
+
+    return (
+        selected_comment,
+        cleaned_comment,
+        status,
+        f"{toxicity_score:.2f}%",
+        prediction_details,
+        probability_plot
+    )
 
 def fetch_and_analyze(youtube_url, max_comments):
     comments = fetch_youtube_comments(youtube_url, max_comments)
@@ -26,6 +76,7 @@ def fetch_and_analyze(youtube_url, max_comments):
         safe_comments,
         toxic_comments,
         round(toxicity_rate, 2),
+        results,
         results
     )  
 
@@ -33,6 +84,7 @@ with gr.Blocks(
     title = "AI YouTube Toxic Comment Detection System"
     ) as demo:
 
+    results_state = gr.State()
     with gr.Column():
         gr.Markdown(
             """
@@ -106,7 +158,9 @@ with gr.Blocks(
         comments_table = gr.Dataframe(
             headers = ["Username", "Comment", "Prediction", "Toxicity Score (%)"],
             label = "Fetched Comments",
-            interactive = False
+            interactive = False,
+            datatype = ["str", "str", "str", "number"],
+            wrap = True
         )
         gr.Markdown("---")
 
@@ -131,8 +185,8 @@ with gr.Blocks(
                 interactive=False
             )
 
-            confidence = gr.Textbox(
-                label="Confidence",
+            toxicity_score = gr.Textbox(
+                label="Toxicity Score",
                 interactive=False
             )
         gr.Markdown("---")
@@ -156,7 +210,21 @@ with gr.Blocks(
                 safe_comments,
                 toxic_comments,
                 toxicity_rate,
-                comments_table
+                comments_table,
+                results_state
+            ]
+        )
+
+        comments_table.select(
+            fn = show_comment_details,
+            inputs = [results_state],
+            outputs=[
+                original_comment,
+                preprocessed_comment,
+                prediction,
+                toxicity_score,
+                prediction_details,
+                probability_plot
             ]
         )
 
