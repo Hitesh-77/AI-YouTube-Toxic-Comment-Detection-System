@@ -7,3 +7,7 @@
     text-align: center;
     padding: 1.5rem 4.5rem;
 }
+
+.gradio-container .prose>*:first-child {
+    margin-top: 0.2rem;
+}
