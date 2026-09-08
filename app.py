@@ -4,9 +4,8 @@ from predict import analyze_all_comments, predict_comment, labels
 import matplotlib.pyplot as plt
 import numpy as np
 
-def show_comment_details(evt: gr.SelectData, results):
-    row_index = evt.index[0]
-    selected_row = results[row_index]
+def show_comment_details(evt: gr.SelectData):
+    selected_row = evt.row_value
 
     selected_comment = selected_row[1]
     cleaned_comment, probabilities, predictions = predict_comment(
@@ -75,8 +74,7 @@ def fetch_and_analyze(youtube_url, max_comments):
         total_comments,
         safe_comments,
         toxic_comments,
-        round(toxicity_rate, 2),
-        results,
+        f"{round(toxicity_rate, 2)}%",
         results
     )  
 
@@ -84,7 +82,6 @@ with gr.Blocks(
     title = "AI YouTube Toxic Comment Detection System"
     ) as demo:
 
-    results_state = gr.State()
     with gr.Column():
         gr.Markdown(
             """
@@ -113,7 +110,7 @@ with gr.Blocks(
 
         max_comments = gr.Slider(
             minimum=10,
-            maximum=500,
+            maximum=1000,
             step=10,
             value=100,
             label="Maximum Comments",
@@ -146,9 +143,9 @@ with gr.Blocks(
                 interactive = False
             )
 
-            toxicity_rate = gr.Number(
+            toxicity_rate = gr.Textbox(
                 label="Toxicity Rate",
-                value = 0,
+                value = '0%',
                 interactive = False
             )
         gr.Markdown("---")
@@ -158,9 +155,7 @@ with gr.Blocks(
         comments_table = gr.Dataframe(
             headers = ["Username", "Comment", "Prediction", "Toxicity Score (%)"],
             label = "Fetched Comments",
-            interactive = False,
-            datatype = ["str", "str", "str", "number"],
-            wrap = True
+            interactive = False
         )
         gr.Markdown("---")
 
@@ -210,14 +205,12 @@ with gr.Blocks(
                 safe_comments,
                 toxic_comments,
                 toxicity_rate,
-                comments_table,
-                results_state
+                comments_table
             ]
         )
 
         comments_table.select(
             fn = show_comment_details,
-            inputs = [results_state],
             outputs=[
                 original_comment,
                 preprocessed_comment,
