@@ -35,7 +35,8 @@ def show_comment_details(evt: gr.SelectData):
         probabilities * 100,
         color = "red"
     )
-
+    plt.gca().spines["top"].set_visible(False)
+    plt.gca().spines["right"].set_visible(False)
     plt.title("Toxicity Probability Distribution", fontsize = 18, fontweight="bold")
     plt.xlabel("Category", fontsize = 14, fontweight="bold")
     plt.ylabel("Probability (%)", fontsize = 14, fontweight="bold")
