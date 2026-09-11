@@ -35,12 +35,13 @@ def show_comment_details(evt: gr.SelectData):
         probabilities * 100
     )
 
-    plt.title("Toxicity Probability Distribution")
-    plt.xlabel("Category")
-    plt.ylabel("Probability (%)")
-    plt.ylim(0, 100)
+    plt.title("Toxicity Probability Distribution", fontsize = 18, fontweight="bold")
+    plt.xlabel("Category", fontsize = 14, fontweight="bold")
+    plt.ylabel("Probability (%)", fontsize = 14, fontweight="bold")
+    plt.ylim(0, 120)
 
-    plt.xticks(rotation=30)
+    plt.xticks(rotation=30, fontsize = 12, fontweight="bold")
+    plt.yticks(fontsize = 12, fontweight="bold")
     plt.tight_layout()
 
     return (
@@ -195,7 +196,8 @@ with gr.Blocks(
         gr.Markdown("---")
 
         probability_plot = gr.Plot(
-            label="Probability Distribution"
+            label="Probability Distribution",
+            show_label=False
         )
 
         fetch_btn.click(
