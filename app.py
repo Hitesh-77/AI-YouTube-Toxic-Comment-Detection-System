@@ -27,7 +27,8 @@ def show_comment_details(evt: gr.SelectData):
             "Positive" if prediction_value == 1 else "Negative"
         ])
 
-    probability_plot = plt.figure(figsize = (8, 4))
+    plt.style.use('dark_background')
+    probability_plot = plt.figure(figsize = (12, 6))
 
     plt.bar(
         labels,
