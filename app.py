@@ -32,7 +32,8 @@ def show_comment_details(evt: gr.SelectData):
 
     plt.bar(
         labels,
-        probabilities * 100
+        probabilities * 100,
+        color = "red"
     )
 
     plt.title("Toxicity Probability Distribution", fontsize = 18, fontweight="bold")
@@ -231,7 +232,7 @@ with gr.Blocks(
 if __name__ == "__main__":
     demo.launch(
         theme = gr.themes.Soft(
-                primary_hue="blue",
+                primary_hue="indigo",
                 secondary_hue="slate"
             ),
         css_paths = "style.css"
