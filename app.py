@@ -52,10 +52,15 @@ def show_comment_details(evt: gr.SelectData):
         status,
         f"{toxicity_score:.2f}%",
         prediction_details,
-        probability_plot
+        probability_plot,
+        gr.update(visible=True),
+        gr.update(visible=False)
     )
 
 def fetch_and_analyze(youtube_url, max_comments):
+    if not youtube_url or not youtube_url.strip():
+        raise gr.Error("Please enter a YouTube video URL.")
+
     comments = fetch_youtube_comments(youtube_url, max_comments)
     results = analyze_all_comments(comments)
 
@@ -79,7 +84,8 @@ def fetch_and_analyze(youtube_url, max_comments):
         safe_comments,
         toxic_comments,
         f"{round(toxicity_rate, 2)}%",
-        results
+        results,
+        gr.update(visible=True)
     )  
 
 with gr.Blocks(
@@ -125,82 +131,89 @@ with gr.Blocks(
             "Fetch & Analyze Comments",
             variant="primary"
         )
-        gr.Markdown("---")
 
-        gr.Markdown("## 📊 Dashboard")
-        with gr.Row():
-            total_comments = gr.Number(
-                label="Total Comments",
-                value = 0,
+        dashboard_section = gr.Column(visible=False)
+        with dashboard_section:
+            gr.Markdown("---")
+
+            gr.Markdown("## 📊 Dashboard")
+            with gr.Row():
+                total_comments = gr.Number(
+                    label="Total Comments",
+                    value = 0,
+                    interactive = False
+                )
+
+                safe_comments = gr.Number(
+                    label="Safe Comments",
+                    value = 0,
+                    interactive = False
+                )
+        
+                toxic_comments = gr.Number(
+                    label="Toxic Comments",
+                    value = 0,
+                    interactive = False
+                )
+
+                toxicity_rate = gr.Textbox(
+                    label="Toxicity Rate",
+                    value = '0%',
+                    interactive = False
+                )
+            gr.Markdown("---")
+
+            gr.Markdown("## 💬 YouTube Comments")
+
+            comments_table = gr.Dataframe(
+                headers = ["Username", "Comment", "Prediction", "Toxicity Score (%)"],
+                label = "Fetched Comments",
                 interactive = False
             )
+            select_message = gr.Markdown("### 🔍 Select a comment above to view detailed ML analysis.")
+            
+        analysis_section = gr.Column(visible=False)
+        with analysis_section:
+            gr.Markdown("---")
 
-            safe_comments = gr.Number(
-                label="Safe Comments",
-                value = 0,
-                interactive = False
-            )
-    
-            toxic_comments = gr.Number(
-                label="Toxic Comments",
-                value = 0,
-                interactive = False
-            )
+            gr.Markdown("## 🔍 Selected Comment Analysis")
 
-            toxicity_rate = gr.Textbox(
-                label="Toxicity Rate",
-                value = '0%',
-                interactive = False
-            )
-        gr.Markdown("---")
+            with gr.Row():
+                original_comment = gr.Textbox(
+                    label = "Original Comment",
+                    interactive = False,
+                    lines = 3
+                )
 
-        gr.Markdown("## 💬 YouTube Comments")
+                preprocessed_comment = gr.Textbox(
+                    label = "Preprocessed Comment",
+                    interactive = False,
+                    lines = 3
+                )
 
-        comments_table = gr.Dataframe(
-            headers = ["Username", "Comment", "Prediction", "Toxicity Score (%)"],
-            label = "Fetched Comments",
-            interactive = False
-        )
-        gr.Markdown("---")
+            with gr.Row():
+                prediction = gr.Textbox(
+                    label="Prediction",
+                    interactive=False
+                )
 
-        gr.Markdown("## 🔍 Selected Comment Analysis")
+                toxicity_score = gr.Textbox(
+                    label="Toxicity Score",
+                    interactive=False
+                )
+            gr.Markdown("---")
 
-        with gr.Row():
-            original_comment = gr.Textbox(
-                label = "Original Comment",
-                interactive = False,
-                lines = 3
-            )
-
-            preprocessed_comment = gr.Textbox(
-                label = "Preprocessed Comment",
-                interactive = False,
-                lines = 3
-            )
-
-        with gr.Row():
-            prediction = gr.Textbox(
-                label="Prediction",
+            prediction_details = gr.Dataframe(
+                headers=["Category", "Probability (%)", "Prediction"],
+                label="Prediction Details",
                 interactive=False
             )
+            gr.Markdown("---")
 
-            toxicity_score = gr.Textbox(
-                label="Toxicity Score",
-                interactive=False
+            probability_plot = gr.Plot(
+                label="Probability Distribution",
+                show_label=False
             )
-        gr.Markdown("---")
-
-        prediction_details = gr.Dataframe(
-            headers=["Category", "Probability (%)", "Prediction"],
-            label="Prediction Details",
-            interactive=False
-        )
-        gr.Markdown("---")
-
-        probability_plot = gr.Plot(
-            label="Probability Distribution",
-            show_label=False
-        )
 
         fetch_btn.click(
             fn = fetch_and_analyze,
@@ -210,7 +223,8 @@ with gr.Blocks(
                 safe_comments,
                 toxic_comments,
                 toxicity_rate,
-                comments_table
+                comments_table,
+                dashboard_section
             ]
         )
 
@@ -222,12 +236,14 @@ with gr.Blocks(
                 prediction,
                 toxicity_score,
                 prediction_details,
-                probability_plot
+                probability_plot,
+                analysis_section,
+                select_message
             ]
         )
 
 
-            
+                
 
 
 if __name__ == "__main__":
