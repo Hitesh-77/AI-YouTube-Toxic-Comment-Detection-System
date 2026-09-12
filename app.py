@@ -336,6 +336,8 @@ with gr.Blocks(
 
 if __name__ == "__main__":
     demo.launch(
+        server_name="0.0.0.0",
+        server_port=10000,
         theme = gr.themes.Soft(
                 primary_hue="indigo",
                 secondary_hue="slate"
