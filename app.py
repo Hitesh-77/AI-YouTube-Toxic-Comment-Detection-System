@@ -85,6 +85,7 @@ def fetch_and_analyze(youtube_url, max_comments):
         toxic_comments,
         f"{round(toxicity_rate, 2)}%",
         results,
+        gr.update(visible=True),
         gr.update(visible=True)
     )  
 
@@ -215,6 +216,26 @@ with gr.Blocks(
                 show_label=False
             )
 
+        export_section = gr.Column(visible=False)
+        with export_section:
+            gr.Markdown("---")
+
+            gr.Markdown("## 📥 Export Results")
+
+            gr.Markdown(
+                "Save the analyzed comments and toxicity predictions for further analysis."
+            )
+
+            gr.Markdown("**Choose a format to export:**")
+
+            with gr.Row():
+                csv_btn = gr.Button("↓ CSV")
+                excel_btn = gr.Button("↓ Excel")
+
+            gr.Markdown(
+                "*Includes comments, predictions, and toxicity scores.*"
+            )
+
         fetch_btn.click(
             fn = fetch_and_analyze,
             inputs = [youtube_url, max_comments],
@@ -224,7 +245,8 @@ with gr.Blocks(
                 toxic_comments,
                 toxicity_rate,
                 comments_table,
-                dashboard_section
+                dashboard_section,
+                export_section
             ]
         )
 
