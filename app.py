@@ -3,6 +3,47 @@ from youtube_comments import fetch_youtube_comments
 from predict import analyze_all_comments, predict_comment, labels
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+
+def download_csv(results):
+    df = pd.DataFrame(
+        results,
+        columns=[
+            "Username",
+            "Comment",
+            "Prediction",
+            "Toxicity Score (%)"
+        ]
+    )
+
+    file_path = "youtube_toxic_comments.csv"
+
+    df.to_csv(
+        file_path,
+        index=False
+    )
+
+    return file_path
+
+def download_excel(results):
+    df = pd.DataFrame(
+        results,
+        columns=[
+            "Username",
+            "Comment",
+            "Prediction",
+            "Toxicity Score (%)"
+        ]
+    )
+
+    file_path = "youtube_toxic_comments.xlsx"
+
+    df.to_excel(
+        file_path,
+        index=False
+    )
+
+    return file_path
 
 def show_comment_details(evt: gr.SelectData):
     selected_row = evt.row_value
@@ -59,7 +100,16 @@ def show_comment_details(evt: gr.SelectData):
 
 def fetch_and_analyze(youtube_url, max_comments):
     if not youtube_url or not youtube_url.strip():
-        raise gr.Error("Please enter a YouTube video URL.")
+        gr.Warning("Please enter a YouTube video URL.")
+        return (
+            gr.skip(),
+            gr.skip(),
+            gr.skip(),
+            gr.skip(),
+            gr.skip(),
+            gr.skip(),
+            gr.skip()
+        )
 
     comments = fetch_youtube_comments(youtube_url, max_comments)
     results = analyze_all_comments(comments)
@@ -86,7 +136,8 @@ def fetch_and_analyze(youtube_url, max_comments):
         f"{round(toxicity_rate, 2)}%",
         results,
         gr.update(visible=True),
-        gr.update(visible=True)
+        gr.update(visible=True),
+        results
     )  
 
 with gr.Blocks(
@@ -132,6 +183,8 @@ with gr.Blocks(
             "Fetch & Analyze Comments",
             variant="primary"
         )
+
+        all_comments_state = gr.State([])
 
         dashboard_section = gr.Column(visible=False)
         with dashboard_section:
@@ -229,8 +282,8 @@ with gr.Blocks(
             gr.Markdown("**Choose a format to export:**")
 
             with gr.Row():
-                csv_btn = gr.Button("↓ CSV")
-                excel_btn = gr.Button("↓ Excel")
+                csv_btn = gr.DownloadButton("↓ CSV", variant="secondary")
+                excel_btn = gr.DownloadButton("↓ Excel", variant="secondary")
 
             gr.Markdown(
                 "*Includes comments, predictions, and toxicity scores.*"
@@ -246,7 +299,8 @@ with gr.Blocks(
                 toxicity_rate,
                 comments_table,
                 dashboard_section,
-                export_section
+                export_section,
+                all_comments_state
             ]
         )
 
@@ -262,6 +316,18 @@ with gr.Blocks(
                 analysis_section,
                 select_message
             ]
+        )
+
+        csv_btn.click(
+            fn=download_csv,
+            inputs=all_comments_state,
+            outputs=csv_btn
+        )
+
+        excel_btn.click(
+            fn=download_excel,
+            inputs=all_comments_state,
+            outputs=excel_btn
         )
 
 
