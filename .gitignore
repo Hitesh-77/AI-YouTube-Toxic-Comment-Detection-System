@@ -1,0 +1,9 @@
+# Environment variables
+.env
+
+# Python generated files
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
