@@ -1,6 +1,12 @@
+html {
+    overflow-y: scroll;
+}
+
 .gradio-container {
-    max-width: 1030px;
-    margin: auto;
+    max-width: 1030px !important;
+    width: 1030px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .gradio-container h1 {
