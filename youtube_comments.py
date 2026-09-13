@@ -11,7 +11,9 @@ def extract_video_id(youtube_url):
     patterns = [
         r"(?:v=)([^&]+)",
         r"(?:youtu\.be/)([^?]+)",
-        r"(?:youtube\.com/shorts/)([^?]+)"
+        r"(?:youtube\.com/shorts/)([^?]+)",
+        r"(?:youtube\.com/embed/)([^?]+)",
+        r"(?:youtube\.com/live/)([^?]+)"
     ]
     
     for pattern in patterns:
